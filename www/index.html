@@ -9,32 +9,14 @@
           var url = theForm.getAttribute('action');
           console.log(url);
           var formData = new FormData(theForm);
-/*
-          let i = 0;
-          //console.dir(droppedFiles);
-          for(theFile of droppedFiles) {
-            i++;
-            //console.log("i = " + i);
-            //console.log("data" in theFile);
-            //console.log(theFile);
-            formData.append("file" + i, theFile);
-          }
-          //console.dir(formData.values());
-
-          //for (let value of formData.values()) { console.dir(value); }
-          //return
-
-          */
-
 
           let i = 0;
-          for(const fileList of dropppedFileLists) {
+          for(const fileList of droppedFileLists) {
             for(theFile of fileList) {
               i++;
               formData.append("file" + i, theFile);
             }
           }
-
 
           axios({
             method: "POST",
@@ -51,20 +33,18 @@
             //theForm.attr("src","data:image/gif;base64," + rawImageData);
 
             // reset files to upload
-            droppedFiles = []; 
+            droppedFileLists = []
           })
-          .catch(function(e) {
-            console.dir(e.response);
-            alert(e.response.data);
-          });
+          //.catch(function(e) {
+          //  console.dir(e.response);
+          //  alert(e.response.data);
+          //});
         };
         theForm.addEventListener("submit", onSubmit);
     });
 
-  //droppedFiles = e.originalEvent.dataTransfer.files; // the files that were dropped
 //<input type="file" id="fileElem" multiple accept="image/*" style="display:none" onchange="handleFiles(this.files)">
-    let droppedFiles = [];
-    const dropppedFileLists = [];
+    let droppedFileLists = [];
 
     function dropHandler(ev) {
       //console.log('File(s) dropped');
@@ -86,12 +66,9 @@
         }
       }
 
-      droppedFiles = ev.dataTransfer.files;
-      dropppedFileLists.push(ev.dataTransfer.files);
-      //droppedFiles = droppedFiles.concat(ev.dataTransfer.files);
-
-      console.log("droppedFiles");
-      console.dir(droppedFiles);
+      // dropping one or multiple files creates one new FileList
+      // to append all files to form, store in droppedFileLists for later
+      droppedFileLists.push(ev.dataTransfer.files);
 
       // Pass event to removeDragData for cleanup
       removeDragData(ev)
