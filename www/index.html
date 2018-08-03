@@ -3,67 +3,91 @@
   <head>
     <meta charset="utf-8">
     <title>Image Combiner - by Max IMBERT, Aug 2018</title>
-  <script src="bower_components/dropzone/dist/min/dropzone.min.js"></script>
+    <script src="bower_components/dropzone/dist/min/dropzone.min.js"></script>
+    <link rel="stylesheet" href="bower_components/dropzone/dist/min/dropzone.min.css" />
+    <script type="text/javascript">
+      Dropzone.options.uploadForm = {
+        autoProcessQueue: false, // wait for submit
+        uploadMultiple: true, // upload all files at once
+        addRemoveLinks: true,
+        acceptedFiles: "image/*", // reject all other file types
 
-  <link rel="stylesheet" href="bower_components/dropzone/dist/min/dropzone.min.css" />
-  <script type="text/javascript">
-    Dropzone.options.uploadForm = {
-      autoProcessQueue: false,
-      uploadMultiple: true,
-      addRemoveLinks: true,
-      maxFilesize: 1, // MB
-      parallelUploads: 100,
-      maxFiles: 100,
-      acceptedFiles: "image/*",
-      init: function() {
-        var dropzone = this;
+        // check before upload for image size
+        maxFilesize: 2, // in MB, per single file
 
-        //var submitButton = this.element.querySelector("button[type=submit]");
-        var submitButton = document.getElementById("combine");
-        submitButton.addEventListener("click", function(e) {
-          e.preventDefault();
-          e.stopPropagation();
+        // also limit the number of images to 10, just to be safe.
+        parallelUploads: 10,
+        maxFiles: 10,
 
-          dropzone.processQueue();
-        });
+        init: function() {
+          var dropzone = this;
+          var submitButton = this.element.querySelector("button[type=submit]");
+          var result = document.getElementById("result");
+          var progress = document.getElementById("progress");
 
-        this.on("successmultiple", function(files, response) {
-          // display the combined image in a dataURI (base64)
-          var theImage = document.getElementById("outputImage");
-          theImage.setAttribute("src", response);
+          submitButton.addEventListener("click", function(e) {
+            e.preventDefault();
+            e.stopPropagation();
 
-          // setup download link
-          var downloadLink = document.getElementById("downloadLink");
-          downloadLink.setAttribute("href", response);
+            dropzone.processQueue();
+          });
 
-          dropzone.removeAllFiles();
-        });
-        this.on("error", function(file, response) {
-          alert(file.name + ": " + response);
-        });
-      }
-    };
-  </script>
+          dropzone.on("addedfile", function() {
+            result.classList.remove("visible");
+            progress.innerHTML = "0%"; // reset
+          });
+          dropzone.on("processingmultiple", function() {
+            progress.classList.add("visible");
+          });
+          dropzone.on("totaluploadprogress", function(uploadProgress, totalBytesSent) {
+            if(Number(uploadProgress) < 100) {
+              progress.innerHTML = uploadProgress + "% sent.";
+            } else {
+              progress.innerHTML = "Done uploaded. Now downloading combined image...";
+            }
+          });
+          dropzone.on("successmultiple", function(files, response) {
+            // display the resulting combined image in a dataURI (base64)
+            var theImage = document.getElementById("outputImage");
+            theImage.setAttribute("src", response);
 
-  <style>
-    form label { display:block; text-align: center; }
-    form { margin-top: 3em;}
-    #results { display: none; }
-    form { position:relative; }
-    #buttons { position: absolute; bottom: 0;}
-    #buttons button { display:inline-block; font-size: 1.33em; margin: 0 auto; }
-    form button[type=submit] {}
-    .dz-progress { display:none; }
-  </style>
+            // setup link for downloading combined image
+            var downloadLink = document.getElementById("downloadLink");
+            downloadLink.setAttribute("href", response);
+
+            // display result and hide progress
+            progress.classList.remove("visible");
+            result.classList.add("visible");
+
+            dropzone.removeAllFiles(); // cleanup
+          });
+          dropzone.on("error", function(file, response) {
+            progress.classList.remove("visible");
+            result.classList.remove("visible");
+            alert(file.name + ": " + response);
+          });
+        }
+      };
+    </script>
+    <style type="text/css">
+      body { font-family: Helvetica, sans-serif; }
+      form.dropzone { margin-top: 3em; position: relative; border-style:dashed; }
+      form label { display: block; text-align: center; }
+      form button[type=submit] { display: inline-block; font-size: 1.33em;
+        margin: 0 auto;  position: absolute; bottom: 0; }
+      #result, #progress { display: none; }
+      #result.visible, #progress.visible { display: block; }
+      #result img { max-width: 100%; }
+      b.dz-progress { display: none; }
+    </style>
   </head>
   <body>
-    <form id='upload-form' action='/upload' method='post' class="dropzone" 
+    <form id='upload-form' action='/upload' method='post' class="dropzone"
       enctype="multipart/form-data">
-      <label class="dz-message">Drop images here</label>
-      <div id="buttons">
-        <button type="submit" id="combine">Combine</button>
-      </div>
+      <label class="dz-message">Drop images here<br />(or click to browse)</label>
+      <button type="submit">Combine</button>
     </form>
+    <div id="progress">100</div>
     <div id="result">
       <img id="outputImage" src="" />
       <a id="downloadLink" download="combined-image.png" href="">Download image</a>
