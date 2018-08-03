@@ -1,0 +1,22 @@
+{
+  "name": "code_challenge_fox_aug2018",
+  "description": "",
+  "main": "index.js",
+  "authors": [
+    "Max IMBERT <maximbert@gmail.com>"
+  ],
+  "license": "ISC",
+  "homepage": "",
+  "private": true,
+  "directory": "www",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "dropzone": "^5.1.1"
+  }
+}
