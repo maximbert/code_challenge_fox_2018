@@ -32,13 +32,15 @@
   </script>
 
   <style>
+  form label { display:block; text-align: center; }
+  form button[type=submit] { display:block; font-size: 1.33em; margin: 0 auto; }
   </style>
   <body>
     <form id='upload-form' action='http://localhost:3000/upload' method='post'
       class="dropzone"
       enctype="multipart/form-data">
 
-
+      <label class="dz-message">Drop two or more images here</label>
       <button type='submit' value='Upload!'>Combine images</button>
     </form>
 
