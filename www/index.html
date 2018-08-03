@@ -18,15 +18,25 @@
       init: function() {
         var dropzone = this;
 
-        this.element.querySelector("button[type=submit]").addEventListener("click", function(e) {
+        //var submitButton = this.element.querySelector("button[type=submit]");
+        var submitButton = document.getElementById("combine");
+        submitButton.addEventListener("click", function(e) {
           e.preventDefault();
           e.stopPropagation();
 
           dropzone.processQueue();
         });
+
         this.on("successmultiple", function(files, response) {
-          var theImage = document.getElementById("output");
+          // display the combined image in a dataURI (base64)
+          var theImage = document.getElementById("outputImage");
           theImage.setAttribute("src", response);
+
+          // setup download link
+          var downloadLink = document.getElementById("downloadLink");
+          downloadLink.setAttribute("href", response);
+
+          dropzone.removeAllFiles();
         });
         this.on("error", function(file, response) {
           alert(file.name + ": " + response);
@@ -36,17 +46,27 @@
   </script>
 
   <style>
-  form label { display:block; text-align: center; }
-  form button[type=submit] { display:block; font-size: 1.33em; margin: 0 auto; }
+    form label { display:block; text-align: center; }
+    form { margin-top: 3em;}
+    #results { display: none; }
+    form { position:relative; }
+    #buttons { position: absolute; bottom: 0;}
+    #buttons button { display:inline-block; font-size: 1.33em; margin: 0 auto; }
+    form button[type=submit] {}
+    .dz-progress { display:none; }
   </style>
+  </head>
   <body>
-    <form id='upload-form' action='http://localhost:3000/upload' method='post'
-      class="dropzone"
+    <form id='upload-form' action='/upload' method='post' class="dropzone" 
       enctype="multipart/form-data">
-
-      <label class="dz-message">Drop two or more images here</label>
-      <button type='submit' value='Upload!'>Combine images</button>
+      <label class="dz-message">Drop images here</label>
+      <div id="buttons">
+        <button type="submit" id="combine">Combine</button>
+      </div>
     </form>
-    <img id="output" src="" />
+    <div id="result">
+      <img id="outputImage" src="" />
+      <a id="downloadLink" download="combined-image.png" href="">Download image</a>
+    </div>
   </body>
 </html>
